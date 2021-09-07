@@ -2,6 +2,7 @@ from itertools import permutations
 from random import randint
 from math import dist
 import pygame
+import math
 
 
 class CityStorage:
@@ -51,24 +52,14 @@ def shortest_path_ants(points, iterations):
 
         if score < best_path_distance:
             best_path = path
+
+        multiplier = 3/(1+(1+5/average(path_scores))**(score-best_path_distance-math.log(2, 1+5/average(path_scores))))
+        #if multiplier != 0:
+        for i in range(len(path) - 1):
+            edge_scores[(path[i], path[i + 1])] = int(edge_scores.get((path[i], path[i + 1])) or 0) + int(pheromone_strength * multiplier)
+           
         if score <= best_path_distance:
             best_path_distance = score
-            multiplier = 3
-        # FIXME ideally this should consider numbers of better and worse scores, not the values of those scores
-        elif score < .98 * best_path_distance:
-            multiplier = 1.5
-        elif score < .95 * best_path_distance:
-            multiplier = 1
-        elif score < .90 * best_path_distance:
-            multiplier = .5
-        elif score < .80 * best_path_distance:
-            multiplier = .2
-        else:
-            multiplier = 0
-
-        if multiplier != 0:
-            for i in range(len(path) - 1):
-                edge_scores[(path[i], path[i + 1])] = int(edge_scores.get((path[i], path[i + 1])) or 0) + int(pheromone_strength * multiplier)
 
     pygame.quit()
     return round(best_path_distance, 2)
